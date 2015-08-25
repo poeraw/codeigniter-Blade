@@ -31,4 +31,8 @@ Example usage in a controller:
 	
 	}
 
+
+Update :
+- New function added set_tags($open_tag, $close_tag)
+
 See the docs on http://laravel.com/docs/views/templating
