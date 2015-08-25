@@ -81,6 +81,17 @@ class Blade
      */
     public $cache_time = 3600;
 
+    /*
+     * edit variable by puuraw
+     */
+
+    /**
+     * Default echo tag
+     * 
+     * @var string
+     */
+    private $_open_tag_regex = '\{\{';
+    private $_close_tag_regex = '\}\}';
 
     public function __set($name, $value)
     {
@@ -197,12 +208,6 @@ class Blade
 
         if ( ! $return)
         {
-            // Is minify requested?
-            if ($this->config->item('minify_output') === TRUE)
-            {
-                $content = $this->output->minify($content);
-            }
-            
             $this->output->append_output($content);
         }
 
@@ -416,9 +421,9 @@ class Blade
      */
     protected function _compile_comments($value)
     {
-        $value = preg_replace('/\{\{--(.+?)(--\}\})?\n/', "<?php // $1 ?>", $value);
+        $value = preg_replace('/'.$this->_open_tag_regex.'--(.+?)(--'.$this->_close_tag_regex.')?\n/', "<?php // $1 ?>", $value);
 
-        return preg_replace('/\{\{--((.|\s)*?)--\}\}/', "<?php /* $1 */ ?>\n", $value);
+        return preg_replace('/'.$this->_open_tag_regex.'--((.|\s)*?)--'.$this->_close_tag_regex.'/', "<?php /* $1 */ ?>\n", $value);
     }
 
 
@@ -430,7 +435,7 @@ class Blade
      */
     protected function _compile_echos($value)
     {
-        return preg_replace('/\{\{(.+?)\}\}/', '<?php echo $1; ?>', $value);
+        return preg_replace('/'.$this->_open_tag_regex.'(.+?)'.$this->_close_tag_regex.'/', '<?php echo $1; ?>', $value);
     }
 
 
@@ -675,6 +680,31 @@ class Blade
         return str_replace('@yield_section', $replace, $value);
     }
 
+
+    /**
+     * poeraw edit
+     */
+
+    public function set_tags($open_tag, $close_tag){
+            
+      $this->_open_tag_regex = $this->_tag_processor($open_tag);
+      
+      $this->_close_tag_regex = $this->_tag_processor($close_tag);
+      
+    }
+    
+    public function _tag_processor($strings) {
+      
+      $strings = str_split($strings);
+      
+      foreach($strings as $string){
+        $string = '\'' . $string ;
+      };
+      
+      $string = implode($strings);
+      
+      return $string;        
+    }
 
 }
 
